@@ -1,1 +1,62 @@
+<?php
+// index.php
+// Simple front-end that loads CSS/JS and uses PHP endpoints for products/cart/checkout
+?>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OrthoCare — Orthopedic Products (PHP)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="logo">OrthoCare</h1>
+      <nav class="nav">
+        <button id="open-cart" class="cart-btn">Cart (<span id="cart-count">0</span>)</button>
+      </nav>
+    </div>
+  </header>
 
+  <main class="container">
+    <section class="hero">
+      <div>
+        <h2>Quality Orthopedic Supplies</h2>
+        <p>Braces, supports, cushions and more — designed for comfort and recovery.</p>
+      </div>
+      <img src="assets/hero-ortho.jpg" alt="orthopedic products" />
+    </section>
+
+    <section class="filters">
+      <input type="search" id="search" placeholder="Search products..." />
+      <select id="category">
+        <option value="all">All categories</option>
+      </select>
+    </section>
+
+    <section id="products" class="product-grid">
+      <!-- products injected by app.js -->
+    </section>
+
+    <aside id="cart-panel" class="cart-panel hidden">
+      <h3>Your cart</h3>
+      <div id="cart-items"></div>
+      <div class="cart-footer">
+        <div class="total">Total: KES <span id="cart-total">0.00</span></div>
+        <button id="checkout" class="btn primary">Checkout (WhatsApp)</button>
+        <button id="close-cart" class="btn ghost">Close</button>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; <span id="year"></span> OrthoCare — Contact: <a id="whatsapp-link" href="#" target="_blank">WhatsApp</a></p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
