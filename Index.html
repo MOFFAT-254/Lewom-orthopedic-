@@ -1,62 +1,196 @@
-<?php
-// index.php
-// Simple front-end that loads CSS/JS and uses PHP endpoints for products/cart/checkout
-?>
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>OrthoCare — Orthopedic Products (PHP)</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>PhysioShop — Physiotherapy Products</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; margin: 0; background: #f9f9f9; }
+    header {
+      background: linear-gradient(135deg, #0d47a1, #1976d2);
+      color: white; display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 20px; position: sticky; top: 0; z-index: 100;
+    }
+    header h1 { font-size: 1.2rem; margin: 0; }
+    .cart-btn { background: white; color: #1976d2; padding: 5px 10px; border-radius: 20px; cursor: pointer; font-weight: 600; }
+    .cart-count { background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.8em; margin-left: 5px; }
+    main { padding: 10px; }
+    section.category { margin-bottom: 40px; }
+    section.category h2 { text-align: center; color: #0d47a1; border-bottom: 2px solid #1976d2; display: inline-block; }
+    .product-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 15px; margin-top: 15px;
+    }
+    .product-card {
+      background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      overflow: hidden; text-align: center; padding: 10px;
+    }
+    .product-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; }
+    .product-card h4 { margin: 10px 0 5px; font-size: 1rem; }
+    .product-card p { color: #444; margin: 5px 0; }
+    .btn-add { background: #1976d2; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; }
+    footer { background: #0d47a1; color: white; text-align: center; padding: 10px; font-size: 0.9em; }
+
+    /* Cart Drawer */
+    #cartDrawer {
+      position: fixed; top: 0; right: 0; width: 90%; max-width: 400px; height: 100%;
+      background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.3);
+      transform: translateX(100%); transition: transform 0.3s ease; z-index: 200; padding: 15px; overflow-y: auto;
+    }
+    #cartDrawer.open { transform: translateX(0); }
+    .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .cart-item p { margin: 0; font-size: 0.9em; }
+    .cart-footer { border-top: 1px solid #ddd; padding-top: 10px; }
+    .checkout-btn { background: #25D366; color: white; border: none; padding: 10px; border-radius: 6px; width: 100%; font-weight: bold; cursor: pointer; }
+
+    @media (max-width:600px){
+      header h1 { font-size: 1rem; }
+      .product-card h4 { font-size: 0.9rem; }
+    }
+  </style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="container">
-      <h1 class="logo">OrthoCare</h1>
-      <nav class="nav">
-        <button id="open-cart" class="cart-btn">Cart (<span id="cart-count">0</span>)</button>
-      </nav>
+  <header>
+    <h1>PhysioShop</h1>
+    <div class="cart-btn" onclick="toggleCart()">
+      <i class="fa fa-shopping-cart"></i> <span id="cartCount">0</span>
     </div>
   </header>
 
-  <main class="container">
-    <section class="hero">
-      <div>
-        <h2>Quality Orthopedic Supplies</h2>
-        <p>Braces, supports, cushions and more — designed for comfort and recovery.</p>
+  <main>
+    <!-- Mobility Aids -->
+    <section class="category" id="mobility">
+      <h2>Mobility Aids</h2>
+      <div class="product-grid">
+        <div class="product-card">
+          <img src="https://images.unsplash.com/photo-1588776814546-ec7d8bfe2806" alt="Wheelchair">
+          <h4>Foldable Wheelchair</h4>
+          <p>KSh 22,000</p>
+          <button class="btn-add" onclick="addToCart('Foldable Wheelchair',22000)">Add to Cart</button>
+        </div>
+        <div class="product-card">
+          <img src="https://images.unsplash.com/photo-1606813902546-cb4e8d79950d" alt="Walker">
+          <h4>Adjustable Walker</h4>
+          <p>KSh 5,500</p>
+          <button class="btn-add" onclick="addToCart('Adjustable Walker',5500)">Add to Cart</button>
+        </div>
       </div>
-      <img src="assets/hero-ortho.jpg" alt="orthopedic products" />
     </section>
 
-    <section class="filters">
-      <input type="search" id="search" placeholder="Search products..." />
-      <select id="category">
-        <option value="all">All categories</option>
-      </select>
-    </section>
-
-    <section id="products" class="product-grid">
-      <!-- products injected by app.js -->
-    </section>
-
-    <aside id="cart-panel" class="cart-panel hidden">
-      <h3>Your cart</h3>
-      <div id="cart-items"></div>
-      <div class="cart-footer">
-        <div class="total">Total: KES <span id="cart-total">0.00</span></div>
-        <button id="checkout" class="btn primary">Checkout (WhatsApp)</button>
-        <button id="close-cart" class="btn ghost">Close</button>
+    <!-- Supports -->
+    <section class="category" id="supports">
+      <h2>Supports & Braces</h2>
+      <div class="product-grid">
+        <div class="product-card">
+          <img src="https://images.unsplash.com/photo-1606811844557-55b49b54ed9e" alt="Knee Brace">
+          <h4>Knee Brace</h4>
+          <p>KSh 2,500</p>
+          <button class="btn-add" onclick="addToCart('Knee Brace',2500)">Add to Cart</button>
+        </div>
+        <div class="product-card">
+          <img src="https://images.unsplash.com/photo-1597699403665-6a21ad5088b3" alt="Back Support">
+          <h4>Back Support Belt</h4>
+          <p>KSh 3,000</p>
+          <button class="btn-add" onclick="addToCart('Back Support Belt',3000)">Add to Cart</button>
+        </div>
       </div>
-    </aside>
+    </section>
+
+    <!-- Hospital Equipment -->
+    <section class="category" id="hospital">
+      <h2>Hospital Equipment</h2>
+      <div class="product-grid">
+        <div class="product-card">
+          <img src="https://images.unsplash.com/photo-1603791452906-b60e9c3217f1" alt="Hospital Bed">
+          <h4>Adjustable Hospital Bed</h4>
+          <p>KSh 55,000</p>
+          <button class="btn-add" onclick="addToCart('Adjustable Hospital Bed',55000)">Add to Cart</button>
+        </div>
+        <div class="product-card">
+          <img src="https://images.unsplash.com/photo-1611691549717-03b2b5f417a1" alt="BP Machine">
+          <h4>Digital BP Machine</h4>
+          <p>KSh 3,800</p>
+          <button class="btn-add" onclick="addToCart('Digital BP Machine',3800)">Add to Cart</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Compression -->
+    <section class="category" id="compression">
+      <h2>Compression & Therapy</h2>
+      <div class="product-grid">
+        <div class="product-card">
+          <img src="https://images.unsplash.com/photo-1606811846940-dab5c94cf59c" alt="Elastic Bandage">
+          <h4>Elastic Bandage</h4>
+          <p>KSh 500</p>
+          <button class="btn-add" onclick="addToCart('Elastic Bandage',500)">Add to Cart</button>
+        </div>
+        <div class="product-card">
+          <img src="https://images.unsplash.com/photo-1606811844511-7dbed8d702a3" alt="Hot Pack">
+          <h4>Reusable Hot Pack</h4>
+          <p>KSh 800</p>
+          <button class="btn-add" onclick="addToCart('Reusable Hot Pack',800)">Add to Cart</button>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p>&copy; <span id="year"></span> OrthoCare — Contact: <a id="whatsapp-link" href="#" target="_blank">WhatsApp</a></p>
+  <!-- Cart Drawer -->
+  <div id="cartDrawer">
+    <h3>Your Cart</h3>
+    <div id="cartItems"></div>
+    <div class="cart-footer">
+      <p><strong>Total:</strong> KSh <span id="cartTotal">0</span></p>
+      <button class="checkout-btn" onclick="sendOrder()">Checkout via WhatsApp</button>
     </div>
+  </div>
+
+  <footer>
+    © 2025 PhysioShop | Designed by Moffay Khayundi
   </footer>
 
-  <script src="app.js"></script>
+  <script>
+    const WA_PHONE = "254702035452";
+    let cart = JSON.parse(localStorage.getItem("physioshop_cart")) || [];
+
+    function addToCart(name, price) {
+      const item = cart.find(i => i.name === name);
+      if (item) item.qty++;
+      else cart.push({ name, price, qty: 1 });
+      saveCart();
+    }
+
+    function saveCart() {
+      localStorage.setItem("physioshop_cart", JSON.stringify(cart));
+      updateCart();
+    }
+
+    function updateCart() {
+      document.getElementById("cartCount").textContent = cart.reduce((a,b)=>a+b.qty,0);
+      document.getElementById("cartItems").innerHTML = cart.map(i =>
+        `<div class='cart-item'><p>${i.name} x${i.qty}</p><p>KSh ${i.price*i.qty}</p></div>`
+      ).join('');
+      document.getElementById("cartTotal").textContent = cart.reduce((t,i)=>t+i.price*i.qty,0);
+    }
+
+    function toggleCart() {
+      document.getElementById("cartDrawer").classList.toggle("open");
+      updateCart();
+    }
+
+    function sendOrder() {
+      if (cart.length === 0) { alert("Cart is empty"); return; }
+      let message = "*PhysioShop Order*%0A";
+      cart.forEach(i => {
+        message += `• ${i.name} x${i.qty} = KSh ${i.price*i.qty}%0A`;
+      });
+      const total = cart.reduce((t,i)=>t+i.price*i.qty,0);
+      message += `%0A*Total:* KSh ${total}%0AThank you for shopping with us!`;
+      window.open(`https://wa.me/${WA_PHONE}?text=${message}`,'_blank');
+    }
+
+    updateCart();
+  </script>
 </body>
 </html>
